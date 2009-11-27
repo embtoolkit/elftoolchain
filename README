@@ -1,0 +1,8 @@
+: README
+
+* Directory Structure
+
+  trunk/	Current -HEAD.
+  branches/	Work in progress.
+  releases/	Release branches.
+  tags/		Named snapshots of source trees ("readonly" by convention).
