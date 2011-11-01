@@ -1,8 +1,8 @@
 : README
 
-* Directory Structure
+* Repository Structure
 
-  trunk/	Current -HEAD.
-  branches/	Work in progress.
-  releases/	Release branches.
+  trunk/	Used for active development.
+  branches/	Release branches.
   tags/		Named snapshots of source trees ("readonly" by convention).
+  users/	Private work areas for developers.
