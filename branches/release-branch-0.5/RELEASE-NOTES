@@ -148,11 +148,13 @@ Known Limitations
 
 This release has the following limitations:
 
-:Test coverage: Our test suites are still under development and the
-    test coverage for this release is partial.
+:Test coverage:
+    Our test suites are still under development and the test coverage
+    for this release is partial.
 
-:Performance and Memory Use: Our tools have not been characterized for
-    their memory usage or for their performance characteristics.
+:Performance and Memory Use:
+    Our tools have not been characterized for their memory usage or for
+    their performance characteristics.
 
 We hope to address these limitations in future releases.
 
