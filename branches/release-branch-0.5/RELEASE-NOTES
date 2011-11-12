@@ -1,16 +1,9 @@
 .. $Id$
 
-.. This file contains a template for use when writing release notes.
-.. It needs to be updated with release-specific content prior to
-.. cutting a release.  RST comments (such as this one) also need to be
-.. removed prior to the release.
+Release Notes for Elftoolchain Software Version 0.5
+===================================================
 
-.. The tokens '%.*%' need be replaced with actual content.
-
-Release Notes for Elftoolchain Software Version %%
-==================================================
-
-These release notes document version %VER% of the software released by
+These release notes document version 0.5 of the software released by
 the Elftoolchain project.
 
 About The Project
@@ -23,8 +16,9 @@ objects.
 About The Release
 -----------------
 
-.. Describe the rationale for the release (e.g. new features,
-.. significant bug fixes, etc.).
+This release is the first public release of the software developed by
+the Elftoolchain project.
+
 
 Libraries and Utilities
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -55,8 +49,8 @@ This release comprises the following libraries and utilities.
 Documentation
 ~~~~~~~~~~~~~
 
-Each public API and invocable utility has its own manual (%MAN% pages
-in all).
+Each public API and invocable utility has its own manual page (327
+manual entries, documented in 186 files).
 
 Additionally, this release contains the following documentation:
 
@@ -86,21 +80,19 @@ The release contains the following test suites:
 System Requirements
 -------------------
 
-.. Hardware and software requirements for using this software.
-
 This software is designed to run on Unix(TM)-like operating systems
 such as the BSD-family of operating systems and GNU/Linux.
 
 This release has been built and tested on the following operating
 systems:
 
-  =================   ========   =======================
-  Operating System    Version    Supported Architectures
-  -----------------   --------   -----------------------
-  FreeBSD_            v8.2       amd64 & i386
-  NetBSD_             v5.0.2     i386
-  Ubuntu_ GNU/Linux   10.04LTS   i386 & x86_64
-  =================   ========   =======================
+  ====================  ===========  ===========================
+  **Operating System**  **Version**  **Supported Architectures**
+  --------------------  -----------  ---------------------------
+  FreeBSD_              v8.2         amd64 & i386
+  NetBSD_               v5.0.2       i386
+  Ubuntu_ GNU/Linux     10.04LTS     i386 & x86_64
+  ====================  ===========  ===========================
 
 
 Installation and Upgrades
@@ -112,13 +104,6 @@ Installation
 Instructions for building and installing this software from source are
 described in the file "INSTALL".
 
-Upgrading
----------
-
-.. Special notes about upgrading this software from a prior release.
-.. For example, if we introduce any backwards-incompatible behaviour,
-.. or if we deprecate existing behaviour.
-
 
 Release Information
 ===================
@@ -126,17 +111,82 @@ Release Information
 Changes in this release
 -----------------------
 
-.. A list of significant changes in the release.
+This is the first public release of the Elftoolchain sources.
+
+Differences with prior FreeBSD versions of some components
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Some of the libraries and utilities in this release were originally
+developed at the FreeBSD_ project.  These components differ from their
+prior versions in FreeBSD source tree in the following ways:
+
+:ar:
+    - ``ar`` supports BSD-style archives.
+:brandelf:
+    - ``brandelf`` supports additional ELF brands.
+:libdwarf:
+    - The ``libdwarf`` library implements the complete DWARF(3)
+      producer and consumer API set.  Each public API has been
+      documented in the form of a manual page.
+:libelf:
+    - ``libelf`` supports operations on special devices in addition to
+      regular files.
+    - ``libelf`` supports opening of ELF objects in read/write mode.
+    - The archive handling APIs in ``libelf`` can process BSD-style archives.
+    - Numerous bugs in the code have been fixed.
+
+Additionally, the manual pages associated with these components have
+been improved.
 
 Outstanding Issues
 ------------------
 
-.. Problems discovered when testing the release.
+There were no outstanding issues at the time of the release.
 
 Known Limitations
 -----------------
 
-.. Known limitations.
+This release has the following limitations:
+
+:Test coverage: Our test suites are still under development and the
+    test coverage for this release is partial.
+
+:Performance and Memory Use: Our tools have not been characterized for
+    their memory usage or for their performance characteristics.
+
+We hope to address these limitations in future releases.
+
+
+Test Statistics
+---------------
+
+The test summary for this release is presented below:
+
+ ========= ========= ===============  ================  ===================
+ **Suite** **Tests** **FreeBSD 8.2**  **NetBSD 5.0.2**  **Ubuntu 10.04LTS**
+ ========= ========= ===============  ================  ===================
+ ar 	   235	     P: 235	      P: 235		P: 235
+ elfcopy   152	     P: 152	      P: 152		P: 152
+ elfdump   155	     P: 155	      P: 155		P: 155
+ libdwarf  133	     P: 133	      P: 133		P: 133
+ libelf    1024	     P: 1020, U: 4    P: 1020, U: 4	P: 1020, U: 4       
+ ========= ========= ===============  ================  ===================
+
+Key:
+
+  :P:
+      Test successes.
+  :F:
+      Test failures.
+  :U:
+      Unresolved tests.
+
+Notes
+~~~~~
+
+ - Four test cases in the libelf test suite cannot be tested on
+   account of shortcomings in the test infrastructure in the current
+   release.
 
 More Information
 ================
