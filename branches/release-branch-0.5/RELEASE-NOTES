@@ -167,28 +167,31 @@ Test Statistics
 
 The test summary for this release is presented below:
 
- ========= ========= ===============  ================  ===================
- **Suite** **Tests** **FreeBSD 8.2**  **NetBSD 5.0.2**  **Ubuntu 10.04LTS**
- ========= ========= ===============  ================  ===================
- ar 	   235	     P: 235	      P: 235		P: 235
- elfcopy   152	     P: 152	      P: 152		P: 152
- elfdump   155	     P: 155	      P: 155		P: 155
- libdwarf  133	     P: 133	      P: 133		P: 133
- libelf    1024	     P: 1020, U: 4    P: 1020, U: 4	P: 1020, U: 4       
- ========= ========= ===============  ================  ===================
+ ========= =========== ===============  ================  ===================
+ **Suite** **Tests**   **FreeBSD 8.2**  **NetBSD 5.0.2**  **Ubuntu 10.04LTS**
+           (32&64 bit) (i386 & amd64)   (i386)            (i386 & x86_64)
+ ========= =========== ===============  ================  ===================
+ ar 	   51 & 50     P: 51 & 50	P: 51		  P: 51 & 50
+ elfcopy   39	       P: 39	        P: 39		  P: 39
+ elfdump   155	       P: 155	        P: 155		  P: 155
+ libdwarf  133	       P: 133	        P: 133		  P: 133
+ libelf    1024	       P: 1020, U: 4    P: 1020, U: 4	  P: 1020, U: 4       
+ ========= =========== ===============  ================  ===================
 
 Key:
 
-  :P:
-      Test successes.
   :F:
       Test failures.
+  :P:
+      Test successes.
   :U:
       Unresolved tests.
 
 Notes
 ~~~~~
 
+ - The test suite for ``ar`` contains one test that is applicable only
+   on 32-bit systems.
  - Four test cases in the libelf test suite cannot be tested on
    account of shortcomings in the test infrastructure in the current
    release.
