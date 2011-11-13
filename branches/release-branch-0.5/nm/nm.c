@@ -66,7 +66,7 @@ typedef int (*fn_filter)(char, const GElf_Sym *, const char *);
 
 /* output filter list */
 SLIST_HEAD(filter_head, filter_entry) nm_out_filter =
-SLIST_HEAD_INITIALIZER(nm_out_filter);
+    SLIST_HEAD_INITIALIZER(nm_out_filter);
 
 struct filter_entry {
 	fn_filter	fn;
@@ -171,10 +171,6 @@ struct nm_prog_options {
 p->t_table == NULL || p->s_table == NULL || p->filename == NULL)
 #define	IS_SYM_TYPE(t)		((t) == '?' || isalpha((t)) != 0)
 #define	IS_UNDEF_SYM_TYPE(t)	((t) == 'U' || (t) == 'v' || (t) == 'w')
-#define	IS_COM_SYM(s)		(s->st_shndx == SHN_COMMON)
-#define	SLIST_HINIT_AFTER(l)	{l->slh_first = NULL;}
-#define	STAILQ_HINIT_AFTER(l)	{l.stqh_first = NULL; \
-l.stqh_last = &(l).stqh_first;}
 #define	UNUSED(p)		((void)p)
 
 static int		cmp_name(const void *, const void *);
@@ -184,10 +180,9 @@ static int		cmp_value(const void *, const void *);
 static void		filter_dest(void);
 static int		filter_insert(fn_filter);
 static void		get_opt(int, char **);
-static int		get_sym(Elf *, struct sym_head *, int,
-			    const Elf_Data *, const Elf_Data *, const char *,
-			    const char **, int);
-static const char *	get_sym_name(const GElf_Sym *, const Elf_Data *,
+static int		get_sym(Elf *, struct sym_head *, int, size_t, size_t,
+			    const char *, const char **, int);
+static const char *	get_sym_name(Elf *, const GElf_Sym *, size_t,
 			    const char **, int);
 static char		get_sym_type(const GElf_Sym *, const char *);
 static void		global_dest(void);
@@ -229,7 +224,6 @@ static void		sym_list_print_each(struct sym_entry *,
 			    struct sym_print_data *, struct func_info_head *,
 			    struct var_info_head *, struct line_info_head *);
 static struct sym_entry	*sym_list_sort(struct sym_print_data *);
-static int		sym_section_filter(const GElf_Shdr *);
 static void		sym_size_oct_print(const GElf_Sym *);
 static void		sym_size_hex_print(const GElf_Sym *);
 static void		sym_size_dec_print(const GElf_Sym *);
@@ -417,8 +411,10 @@ filter_insert(fn_filter filter_fn)
 
 	assert(filter_fn != NULL);
 
-	if ((e = malloc(sizeof(struct filter_entry))) == NULL)
+	if ((e = malloc(sizeof(struct filter_entry))) == NULL) {
+		warn("malloc");
 		return (0);
+	}
 	e->fn = filter_fn;
 	SLIST_INSERT_HEAD(&nm_out_filter, e, filter_entries);
 
@@ -596,19 +592,18 @@ get_opt(int argc, char **argv)
 
 /*
  * Get symbol information from elf.
- * param shnum Total section header number(ehdr.e_shnum).
  */
 static int
-get_sym(Elf *elf, struct sym_head *headp, int shnum,
-    const Elf_Data *dynstr_data, const Elf_Data *strtab_data,
-    const char *type_table, const char **sec_table, int sec_table_size)
+get_sym(Elf *elf, struct sym_head *headp, int shnum, size_t dynndx,
+    size_t strndx, const char *type_table, const char **sec_table,
+    int sec_table_size)
 {
 	Elf_Scn *scn;
 	Elf_Data *data;
-	const Elf_Data *table;
 	GElf_Shdr shdr;
 	GElf_Sym sym;
 	struct filter_entry *fep;
+	size_t ndx;
 	int rtn;
 	const char *sym_name;
 	char type;
@@ -619,38 +614,41 @@ get_sym(Elf *elf, struct sym_head *headp, int shnum,
 	assert(headp != NULL);
 
 	rtn = 0;
-	for (i = 1; i < shnum; ++i) {
-		if ((scn = elf_getscn(elf, i)) == NULL)
-			return (0);
-		if (gelf_getshdr(scn, &shdr) == NULL)
-			return (0);
-		if (sym_section_filter(&shdr) != 1)
+	for (i = 1; i < shnum; i++) {
+		if ((scn = elf_getscn(elf, i)) == NULL) {
+			warnx("elf_getscn failed: %s", elf_errmsg(-1));
+			continue;
+		}
+		if (gelf_getshdr(scn, &shdr) != &shdr) {
+			warnx("gelf_getshdr failed: %s", elf_errmsg(-1));
+			continue;
+		}
+		if (shdr.sh_type == SHT_SYMTAB) {
+			if (nm_opts.print_symbol != PRINT_SYM_SYM)
+				continue;
+		} else if (shdr.sh_type == SHT_DYNSYM) {
+			if (nm_opts.print_symbol != PRINT_SYM_DYN)
+				continue;
+		} else
 			continue;
 
-		if (shdr.sh_type == SHT_DYNSYM && dynstr_data != NULL)
-			table = dynstr_data;
-		else if (shdr.sh_type == SHT_SYMTAB && strtab_data != NULL)
-			table = strtab_data;
-		else
-			table = NULL;
+		ndx = shdr.sh_type == SHT_DYNSYM ? dynndx : strndx;
 
 		data = NULL;
 		while ((data = elf_getdata(scn, data)) != NULL) {
 			j = 1;
 			while (gelf_getsym(data, j++, &sym) != NULL) {
-
-				sym_name = get_sym_name(&sym, table, sec_table,
-				    sec_table_size);
-
+				sym_name = get_sym_name(elf, &sym, ndx,
+				    sec_table, sec_table_size);
 				filter = false;
 				type = get_sym_type(&sym, type_table);
 				SLIST_FOREACH(fep, &nm_out_filter,
-				    filter_entries)
+				    filter_entries) {
 					if (!fep->fn(type, &sym, sym_name)) {
 						filter = true;
 						break;
 					}
-
+				}
 				if (filter == false) {
 					if (sym_list_insert(headp, sym_name,
 					    &sym) == 0)
@@ -665,8 +663,8 @@ get_sym(Elf *elf, struct sym_head *headp, int shnum,
 }
 
 static const char *
-get_sym_name(const GElf_Sym *sym, const Elf_Data *str_data,
-    const char **sec_table, int sec_table_size)
+get_sym_name(Elf *elf, const GElf_Sym *sym, size_t ndx, const char **sec_table,
+    int sec_table_size)
 {
 	const char *sym_name;
 
@@ -677,7 +675,7 @@ get_sym_name(const GElf_Sym *sym, const Elf_Data *str_data,
 		if (sec_table != NULL && sym->st_shndx < sec_table_size)
 			sym_name = sec_table[sym->st_shndx];
 	} else
-		sym_name = (const char *) str_data->d_buf + sym->st_name;
+		sym_name = elf_strptr(elf, ndx, sym->st_name);
 
 	if (sym_name == NULL)
 		sym_name = "(null)";
@@ -904,30 +902,6 @@ print_version(void)
 	exit(0);
 }
 
-/*
- * return -1 at error. 0 at false, 1 at true.
- */
-static int
-sym_section_filter(const GElf_Shdr *shdr)
-{
-
-	if (shdr == NULL)
-		return (-1);
-
-	if (!nm_opts.print_debug && shdr->sh_type == SHT_PROGBITS &&
-	    shdr->sh_flags == 0)
-		return (1);
-	if (nm_opts.print_symbol == PRINT_SYM_SYM &&
-	    shdr->sh_type == SHT_SYMTAB)
-		return (1);
-	if (nm_opts.print_symbol == PRINT_SYM_DYN &&
-	    shdr->sh_type == SHT_DYNSYM)
-		return (1);
-
-	/* In manual page, SHT_GNU_versym is also symbol section */
-	return (0);
-}
-
 static uint64_t
 get_block_value(Dwarf_Debug dbg, Dwarf_Block *block)
 {
@@ -1011,16 +985,30 @@ search_line_attr(Dwarf_Debug dbg, struct func_info_head *func_info,
 
 		if (dwarf_attrval_unsigned(die, DW_AT_decl_file, &udata,
 		    &de) == DW_DLV_OK && udata > 0 &&
-		    (Dwarf_Signed) (udata - 1) < filecount)
+		    (Dwarf_Signed) (udata - 1) < filecount) {
 			var->file = strdup(src_files[udata - 1]);
+			if (var->file == NULL) {
+				warn("strdup");
+				free(var);
+				goto cont_search;
+			}
+		}
 
 		if (dwarf_attrval_unsigned(die, DW_AT_decl_line, &udata, &de) ==
 		    DW_DLV_OK)
 			var->line = udata;
 
 		if (dwarf_attrval_string(die, DW_AT_name, &str, &de) ==
-		    DW_DLV_OK)
+		    DW_DLV_OK) {
 			var->name = strdup(str);
+			if (var->name == NULL) {
+				warn("strdup");
+				if (var->file)
+					free(var->file);
+				free(var);
+				goto cont_search;
+			}
+		}
 
 		if (dwarf_attr(die, DW_AT_location, &at, &de) == DW_DLV_OK &&
 		    dwarf_formblock(at, &block, &de) == DW_DLV_OK) {
@@ -1049,16 +1037,30 @@ search_line_attr(Dwarf_Debug dbg, struct func_info_head *func_info,
 		 */
 		if (dwarf_attrval_unsigned(die, DW_AT_decl_file, &udata,
 		    &de) == DW_DLV_OK && udata > 0 &&
-		    (Dwarf_Signed) (udata - 1) < filecount)
+		    (Dwarf_Signed) (udata - 1) < filecount) {
 			func->file = strdup(src_files[udata - 1]);
+			if (func->file == NULL) {
+				warn("strdup");
+				free(func);
+				goto cont_search;
+			}
+		}
 
 		if (dwarf_attrval_unsigned(die, DW_AT_decl_line, &udata, &de) ==
 		    DW_DLV_OK)
 			func->line = udata;
 
 		if (dwarf_attrval_string(die, DW_AT_name, &str, &de) ==
-		    DW_DLV_OK)
+		    DW_DLV_OK) {
 			func->name = strdup(str);
+			if (func->name == NULL) {
+				warn("strdup");
+				if (func->file)
+					free(func->file);
+				free(func);
+				goto cont_search;
+			}
+		}
 
 		if (dwarf_attrval_unsigned(die, DW_AT_low_pc, &udata, &de) ==
 		    DW_DLV_OK)
@@ -1102,7 +1104,6 @@ read_elf(Elf *elf, const char *filename, Elf_Kind kind)
 	Dwarf_Die die;
 	Dwarf_Error de;
 	Dwarf_Half tag;
-	Elf_Data *dynstr_data, *strtab_data;
 	Elf_Arhdr *arhdr;
 	Elf_Scn *scn;
 	GElf_Shdr shdr;
@@ -1121,24 +1122,22 @@ read_elf(Elf *elf, const char *filename, Elf_Kind kind)
 	struct var_info_entry *var;
 	const char *shname, *objname;
 	char *type_table, **sec_table, *sfile, **src_files;
-	size_t strndx, shnum;
+	size_t shstrndx, shnum, dynndx, strndx;
 	int ret, rtn, e_err;
 
 #define	OBJNAME	(objname == NULL ? filename : objname)
 
 	assert(filename != NULL && "filename is null");
 
-	/* Instead of TAILQ_HEAD_INITIALIZER to avoid warning */
-	STAILQ_HINIT_AFTER(list_head);
-
-	dynstr_data = NULL;
-	strtab_data = NULL;
+	STAILQ_INIT(&list_head);
 	type_table = NULL;
 	sec_table = NULL;
 	line_info = NULL;
 	func_info = NULL;
 	var_info = NULL;
 	objname = NULL;
+	dynndx = SHN_UNDEF;
+	strndx = SHN_UNDEF;
 	rtn = 0;
 
 	nm_elfclass = gelf_getclass(elf);
@@ -1162,27 +1161,29 @@ read_elf(Elf *elf, const char *filename, Elf_Kind kind)
 		rtn = 1;
 		goto next_cmd;
 	}
-	if (!elf_getshstrndx(elf, &strndx)) {
+	if (!elf_getshstrndx(elf, &shstrndx)) {
 		warnx("%s: cannot get str index", OBJNAME);
 		rtn = 1;
 		goto next_cmd;
 	}
 	/* type_table for type determine */
 	if ((type_table = malloc(sizeof(char) * shnum)) == NULL) {
-		warn("%s", OBJNAME);
+		warn("%s: malloc", OBJNAME);
 		rtn = 1;
 		goto next_cmd;
 	}
 	/* sec_table for section name to display in sysv format */
 	if ((sec_table = calloc(shnum, sizeof(char *))) == NULL) {
-		warn("%s", OBJNAME);
+		warn("%s: calloc", OBJNAME);
 		rtn = 1;
 		goto next_cmd;
 	}
 
 	type_table[0] = 'U';
-	if ((sec_table[0] = strdup("*UND*")) == NULL)
+	if ((sec_table[0] = strdup("*UND*")) == NULL) {
+		warn("strdup");
 		goto next_cmd;
+	}
 
 	for (i = 1; i < shnum; ++i) {
 		type_table[i] = 'U';
@@ -1200,22 +1201,36 @@ read_elf(Elf *elf, const char *filename, Elf_Kind kind)
 		/*
 		 * Cannot test by type and attribute for dynstr, strtab
 		 */
-		shname = elf_strptr(elf, strndx, (size_t) shdr.sh_name);
+		shname = elf_strptr(elf, shstrndx, (size_t) shdr.sh_name);
 		if (shname != NULL) {
-			if ((sec_table[i] = strdup(shname)) == NULL)
+			if ((sec_table[i] = strdup(shname)) == NULL) {
+				warn("strdup");
 				goto next_cmd;
+			}
 			if (!strncmp(shname, ".dynstr", 7)) {
-				if ((dynstr_data = elf_getdata(scn, NULL)) ==
-				    NULL)
+				dynndx = elf_ndxscn(scn);
+				if (dynndx == SHN_UNDEF) {
+					warnx("%s: elf_ndxscn failed: %s",
+					    OBJNAME, elf_errmsg(-1));
 					goto next_cmd;
+				}
 			}
 			if (!strncmp(shname, ".strtab", 7)) {
-				if ((strtab_data = elf_getdata(scn, NULL)) ==
-				    NULL)
+				strndx = elf_ndxscn(scn);
+				if (strndx == SHN_UNDEF) {
+					warnx("%s: elf_ndxscn failed: %s",
+					    OBJNAME, elf_errmsg(-1));
 					goto next_cmd;
+				}					
 			}
-		} else if ((sec_table[i] = strdup("*UND*")) == NULL)
+		} else {
+			sec_table[i] = strdup("*UND*");
+			if (sec_table[i] == NULL) {
+				warn("strdup");
 				goto next_cmd;
+			}
+		}
+
 
 		if (is_sec_text(&shdr))
 			type_table[i] = 'T';
@@ -1234,9 +1249,9 @@ read_elf(Elf *elf, const char *filename, Elf_Kind kind)
 
 	print_header(filename, objname);
 
-	if ((dynstr_data == NULL && nm_opts.print_symbol == PRINT_SYM_DYN) ||
-	    (strtab_data == NULL && nm_opts.print_symbol == PRINT_SYM_SYM)) {
-		warnx("%s: No symbols", OBJNAME);
+	if ((dynndx == SHN_UNDEF && nm_opts.print_symbol == PRINT_SYM_DYN) ||
+	    (strndx == SHN_UNDEF && nm_opts.print_symbol == PRINT_SYM_SYM)) {
+		warnx("%s: no symbols", OBJNAME);
 		/* This is not an error case */
 		goto next_cmd;
 	}
@@ -1260,15 +1275,12 @@ read_elf(Elf *elf, const char *filename, Elf_Kind kind)
 	func_info = malloc(sizeof(struct func_info_head));
 	var_info = malloc(sizeof(struct var_info_head));
 	if (line_info == NULL || func_info == NULL || var_info == NULL) {
-		warn("malloc failed");
+		warn("malloc");
 		(void) dwarf_finish(dbg, &de);
 		goto process_sym;
 	}
-	SLIST_HINIT_AFTER(line_info);
 	SLIST_INIT(line_info);
-	SLIST_HINIT_AFTER(func_info);
 	SLIST_INIT(func_info);
-	SLIST_HINIT_AFTER(var_info);
 	SLIST_INIT(var_info);
 
 	while ((ret = dwarf_next_cu_header(dbg, NULL, NULL, NULL, NULL, NULL,
@@ -1319,14 +1331,17 @@ read_elf(Elf *elf, const char *filename, Elf_Kind kind)
 				continue;
 			}
 			if ((lie = malloc(sizeof(*lie))) == NULL) {
-				warn("malloc failed");
+				warn("malloc");
 				continue;
 			}
 			lie->addr = lineaddr;
 			lie->line = lineno;
 			lie->file = strdup(sfile);
-			if (lie->file == NULL)
-				warn("strdup failed");
+			if (lie->file == NULL) {
+				warn("strdup");
+				free(lie);
+				continue;
+			}
 			SLIST_INSERT_HEAD(line_info, lie, entries);
 		}
 
@@ -1339,8 +1354,8 @@ read_elf(Elf *elf, const char *filename, Elf_Kind kind)
 
 process_sym:
 
-	p_data.list_num = get_sym(elf, &list_head, shnum, dynstr_data,
-	    strtab_data, type_table, (const char **)sec_table, shnum);
+	p_data.list_num = get_sym(elf, &list_head, shnum, dynndx, strndx,
+	    type_table, (const char **)sec_table, shnum);
 
 	if (p_data.list_num == 0)
 		goto next_cmd;
@@ -1779,13 +1794,17 @@ sym_list_insert(struct sym_head *headp, const char *name, const GElf_Sym *sym)
 
 	if (headp == NULL || name == NULL || sym == NULL)
 		return (0);
-	if ((e = malloc(sizeof(struct sym_entry))) == NULL)
+	if ((e = malloc(sizeof(struct sym_entry))) == NULL) {
+		warn("malloc");
 		return (0);
+	}
 	if ((e->name = strdup(name)) == NULL) {
+		warn("strdup");
 		free(e);
 		return (0);
 	}
 	if ((e->sym = malloc(sizeof(GElf_Sym))) == NULL) {
+		warn("malloc");
 		free(e->name);
 		free(e);
 		return (0);
@@ -1793,8 +1812,8 @@ sym_list_insert(struct sym_head *headp, const char *name, const GElf_Sym *sym)
 
 	memcpy(e->sym, sym, sizeof(GElf_Sym));
 
-	/* GNU nm display size instead value. */
-	if (IS_COM_SYM(sym))
+	/* Display size instead of value for common symbol. */
+	if (sym->st_shndx == SHN_COMMON)
 		e->sym->st_value = sym->st_size;
 
 	STAILQ_INSERT_TAIL(headp, e, sym_entries);
@@ -1905,8 +1924,10 @@ sym_list_sort(struct sym_print_data *p)
 	if (p == NULL || CHECK_SYM_PRINT_DATA(p))
 		return (NULL);
 
-	if ((e_v = malloc(sizeof(struct sym_entry) * p->list_num)) == NULL)
+	if ((e_v = malloc(sizeof(struct sym_entry) * p->list_num)) == NULL) {
+		warn("malloc");
 		return (NULL);
+	}
 
 	idx = 0;
 	STAILQ_FOREACH(ep, p->headp, sym_entries) {
