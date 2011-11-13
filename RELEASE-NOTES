@@ -133,6 +133,9 @@ prior versions in FreeBSD source tree in the following ways:
       regular files.
     - ``libelf`` supports opening of ELF objects in read/write mode.
     - The archive handling APIs in ``libelf`` can process BSD-style archives.
+    - ELF sections containing GNU-style hash tables are supported.
+    - ELF sections containing GNU-style symbol versioning information
+      are supported.
     - Numerous bugs in the code have been fixed.
 
 Additionally, the manual pages associated with these components have
@@ -149,8 +152,8 @@ Known Limitations
 This release has the following limitations:
 
 :Test coverage:
-    Our test suites are still under development and the test coverage
-    for this release is partial.
+    Our test suites are being developed; test coverage for this
+    release is partial.
 
 :Performance and Memory Use:
     Our tools have not been characterized for their memory usage or for
