@@ -61,12 +61,12 @@ The project uses subversion_ for its version control system.
 The subversion branch for the current set of sources may be accessed
 at the following URL:
 
-  https://elftoolchain.svn.sourceforge.net/svnroot/elftoolchain/trunk
+  https://elftoolchain.svn.sourceforge.net/svnroot/elftoolchain/branches/release-branch-0.5
 
 The project's source tree may be checked out from its repository by
 using the ``svn checkout`` command::
 
-    % svn checkout https://elftoolchain.svn.sourceforge.net/svnroot/elftoolchain/trunk
+    % svn checkout https://elftoolchain.svn.sourceforge.net/svnroot/elftoolchain/branches/release-branch-0.5
 
 Checked-out sources may be kept upto-date by running ``svn update``
 inside the source directory::
