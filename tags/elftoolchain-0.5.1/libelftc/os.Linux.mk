@@ -1,3 +1,0 @@
-# $Id$
-
-CFLAGS+=	-Wall
