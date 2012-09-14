@@ -16,7 +16,7 @@ SRCS=	elftc_bfdtarget.c			\
 	libelftc_vstr.c
 INCS=	libelftc.h
 
-RELEASE=	HEAD		# Change this on release branches.
+RELEASE=	0.6.1		# Change this on release branches.
 
 SHLIB_MAJOR=	1
 
