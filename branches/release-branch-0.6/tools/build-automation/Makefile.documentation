@@ -1,0 +1,12 @@
+# -*- mode: makefile -*-
+#
+# Typeset documentation previously extracted by the invoking Makefile.
+#
+# $Id$
+
+DOC?=		build-system
+SRCS=		${DOC}.tex
+
+CLEANFILES+=	${SRCS}
+
+.include "${TOP}/mk/elftoolchain.tex.mk"
