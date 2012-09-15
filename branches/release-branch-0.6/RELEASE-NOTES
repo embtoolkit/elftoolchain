@@ -1,13 +1,6 @@
 .. $Id$
 
-.. This file contains a template for use when writing release notes.
-.. It needs to be updated with release-specific content prior to
-.. cutting a release.  RST comments (such as this one) also need to be
-.. removed prior to the release.
-
-.. The tokens '%.*%' need be replaced with actual content.
-
-Release Notes for Elftoolchain Software Version %.%.%
+Release Notes for Elftoolchain Software Version 0.6.1
 =====================================================
 
 About The Project
@@ -20,8 +13,14 @@ objects.
 About The Release
 -----------------
 
-.. Describe the rationale for the release (e.g. new features,
-.. significant bug fixes, etc.).
+This is the first release on the v0.6 "stable" code line.
+
+Since our prior v0.5.1 release, we have added support for building the
+project on additional operating systems, namely DragonFlyBSD, Minix
+and OpenBSD.  A number of bugs were fixed, and the project's
+documentation has been improved.
+
+No new utilities are being introduced in this release.
 
 Libraries and Utilities
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -52,8 +51,8 @@ This release comprises the following libraries and utilities.
 Documentation
 ~~~~~~~~~~~~~
 
-Each public API and invocable utility has its own manual page
-(%NENTRIES% manual entries, documented in %NFILES% files).
+Each public API and invocable utility has a reference manual entry.
+We currently offer 330 manual entries, documented in 189 manual pages.
 
 Additionally, this release contains the following documentation:
 
@@ -83,8 +82,6 @@ The release contains the following test suites:
 System Requirements
 -------------------
 
-.. Hardware and software requirements for using this software.
-
 This software is designed to run on Unix(TM)-like operating systems
 such as the BSD-family of operating systems and GNU/Linux.
 
@@ -94,8 +91,11 @@ systems:
   ====================  ===========  ===========================
   **Operating System**  **Version**  **Supported Architectures**
   --------------------  -----------  ---------------------------
+  `DragonFly BSD`_      2.10.1       i386
   FreeBSD_              v8.2         amd64 & i386
+  Minix_                3.0.2        i386
   NetBSD_               v5.0.2       i386
+  OpenBSD_              v5.0         i386
   Ubuntu_ GNU/Linux     10.04LTS     i386 & x86_64
   ====================  ===========  ===========================
 
@@ -112,10 +112,8 @@ described in the file "INSTALL".
 Upgrading
 ---------
 
-.. Special notes about upgrading this software from a prior release.
-.. For example, if we introduce any backwards-incompatible behaviour,
-.. or if we deprecate existing behaviour.
-
+There are no special considerations for upgrading from the prior
+(v0.5.1) release.
 
 Release Information
 ===================
@@ -123,32 +121,105 @@ Release Information
 Changes in this release
 -----------------------
 
-.. A list of significant changes in the release.
+The source tree has been ported to DragonFlyBSD, Minix and OpenBSD.
+
+Other significant changes include:
+
+* **ar**
+
+  * A file descriptor exhaustion bug was fixed [ticket #388].
+  * Support for building with newer versions of ``libarchive``.
+  * Memory errors were corrected.
+
+* **brandelf**
+
+  * The **brandelf** utility will try to preserve the layout of the
+    ELF object being updated [ticket #375].
+
+* **elfcopy/strip/mcs**
+
+  * A few memory leaks were fixed.
+
+* **elfdump**
+
+  * Compatibility with Solaris(TM) ``elfdump`` was improved.
+  * Memory errors were corrected.
+
+* **libdwarf**
+
+  * Partial support for DWARF4 has been added [ticket #394]
+  * An infinite loop bug was fixed [ticket #396].
+  * Memory related errors were fixed.
+
+* **libelf**
+
+  * Extension APIs have been added, for the internal use of the project.
+  * Memory related errors were fixed.
+
+* **libelf-by-example**
+
+  * The diagrams in the tutorial have been reworked and the text has
+    been improved.
+
+* **libelftc**
+
+  * New helper functions were added, for the internal use of the
+    project.
+
+* **nm**
+
+  * The behavior of the ``-o`` option was brought in line with POSIX.
+  * Memory leaks were fixed.
+
+* **readelf**
+
+  * Compatibility with GNU **readelf** was improved.
+  * The ``-x`` and ``-p`` options now accept section names in addition
+    to section numbers.
+  * A crash when dumping sections of type SHT_NOBITS was corrected.
+
+* **size**
+
+  * Memory leaks were fixed.
+
+All our utilities now accept ``--help`` and ``--version`` command-line
+options.
+
+Apart from code changes, a number of manual pages were improved.
 
 Outstanding Issues
 ------------------
 
-.. Problems discovered when testing the release.
+There were no outstanding issues at the time of the release.
 
 Known Limitations
 -----------------
 
-.. Known limitations.
+This release has the following limitations:
+
+:Test coverage:
+    Our test suites are being developed; test coverage is still
+    partial.
+:Performance and Memory Use:
+    Our tools have not been fully analyzed for their memory use or for
+    their performance characteristics.
 
 Test Statistics
 ---------------
 
 The test summary for this release is presented below:
 
- ========= ========= ===============  ================  ===================
- **Suite** **Tests** **FreeBSD**      **NetBSD**        **Ubuntu 10.04LTS**
- ========= ========= ===============  ================  ===================
- ar 	  
- elfcopy  
- elfdump  
- libdwarf 
- libelf   
- ========= ========= ===============  ================  ===================
+ ========= ==========  ===============  ===============  ================  ===================
+ **Suite** **Tests**   **DragonFly**    **FreeBSD**      **NetBSD**        **Ubuntu 10.04LTS**
+	   (32&64bit)  (i386)		(i386 & amd64)   (i386)            (i386 & x86_64)
+ ========= ==========  ===============  ===============  ================  ===================
+ ar	   235 & 230   P:235            P:235 & P:230    P:235             P:235 & P:230
+ elfcopy   156         P:156            P:156            P:156             P:156
+ elfdump   155         P:155            P:155            P:155		   P:155
+ libdwarf  133         P:133            P:133            P:133		   P:133
+ libelf    1024        P:1020, U:4      P:1020, U:4      P:1020, U:4	   P:1020, U:4
+ nm        183         P:183            P:183            P:183		   P:183
+ ========= ==========  ===============  ===============  ================  ===================
 
 Key:
 
@@ -161,6 +232,12 @@ Key:
 
 Notes
 ~~~~~
+
+* The test suite for **ar** contains five tests that are applicable only
+  on 32-bit systems.
+* Four test cases in the libelf test suite cannot be tested on
+  account of shortcomings in the test infrastructure in the current
+  release.
 
 More Information
 ================
@@ -190,9 +267,12 @@ This software is copyright its authors, and is distributed under the
 `BSD License`_.
 
 .. _BSD License: http://www.opensource.org/licenses/bsd-license.php
+.. _DragonFly BSD: http://www.dragonflybsd.org/
 .. _Elftoolchain project: http://elftoolchain.sourceforge.net/
 .. _FreeBSD: http://www.freebsd.org/
+.. _Minix:   http://www.minix3.org/
 .. _NetBSD:  http://www.netbsd.org/
+.. _OpenBSD: http://www.openbsd.org/
 .. _`Trac instance`: http://sourceforge.net/apps/trac/elftoolchain/report
 .. _Ubuntu:  http://www.ubuntu.com/
 
