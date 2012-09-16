@@ -138,6 +138,9 @@ Other significant changes include:
 
 * **elfcopy/strip/mcs**
 
+  * Fixed a critical bug: when stripping an object, properly handle a
+    segment containing exactly one section of type SHT_NOBITS
+    [`changeset 2540`_].
   * A few memory leaks were fixed.
 
 * **elfdump**
@@ -272,6 +275,7 @@ This software is copyright its authors, and is distributed under the
 .. _OpenBSD: http://www.openbsd.org/
 .. _`Trac instance`: http://sourceforge.net/apps/trac/elftoolchain/report
 .. _Ubuntu:  http://www.ubuntu.com/
+.. _changeset 2540: http://sourceforge.net/apps/trac/elftoolchain/changeset/2540
 .. _ticket #375: http://sourceforge.net/apps/trac/elftoolchain/ticket/375
 .. _ticket #388: http://sourceforge.net/apps/trac/elftoolchain/ticket/388
 .. _ticket #394: http://sourceforge.net/apps/trac/elftoolchain/ticket/394
