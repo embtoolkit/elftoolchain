@@ -28,24 +28,24 @@ Libraries and Utilities
 This release comprises the following libraries and utilities.
 
   =================       ==========================================
-  **Name**	          **Description**
+  **Name**                **Description**
   =================       ==========================================
-  ar	                  Archive manager.
-  addr2line	          Debug tool.
-  brandelf	          Manage the ELF brand on executables.
-  c++filt	          Translate encoded symbols.
-  elfcopy	          Copy and translate between object formats.
-  elfdump	          Diagnostic tool.
-  findtextrel	          Find undesired text relocations.
-  libdwarf	          DWARF access library.
-  libelf	          ELF access library.
-  mcs	                  Manage comment sections.
-  nm	                  List symbols in an ELF object.
-  ranlib	          Add archive symbol tables to an archive.
-  readelf	          Display ELF information.
-  size	                  List object sizes.
-  strings	          Extract printable strings.
-  strip	                  Discard information from ELF objects.
+  **ar**                  Archive manager.
+  **addr2line**           Debug tool.
+  **brandelf**            Manage the ELF brand on executables.
+  **c++filt**             Translate encoded symbols.
+  **elfcopy**             Copy and translate between object formats.
+  **elfdump**             Diagnostic tool.
+  **findtextrel**         Find undesired text relocations.
+  **libdwarf**            DWARF access library.
+  **libelf**              ELF access library.
+  **mcs**                 Manage comment sections.
+  **nm**                  List symbols in an ELF object.
+  **ranlib**              Add archive symbol tables to an archive.
+  **readelf**             Display ELF information.
+  **size**                List object sizes.
+  **strings**             Extract printable strings.
+  **strip**               Discard information from ELF objects.
   =================       ==========================================
 
 Documentation
@@ -57,9 +57,9 @@ We currently offer 330 manual entries, documented in 189 manual pages.
 Additionally, this release contains the following documentation:
 
   =================       ==========================================
-  **Name**	          **Description**
+  **Name**                **Description**
   =================       ==========================================
-  libelf-by-example       A tutorial introduction to ``libelf``.
+  libelf-by-example       A tutorial introduction to **libelf**.
   =================       ==========================================
 
 Test Suites
@@ -68,14 +68,14 @@ Test Suites
 The release contains the following test suites:
 
   =================       ==========================================
-  **Name**	          **Description**
+  **Name**                **Description**
   =================       ==========================================
-  ar			  Test the ``ar`` utility.
-  elfcopy		  Test the ``elfcopy`` utility.
-  elfdump		  Test the ``elfdump`` utility.
-  libdwarf		  Test the ``libdwarf`` library.
-  libelf		  Test the ``libelf`` library.
-  nm			  Test the ``nm`` utility.
+  ar                      Test the **ar** utility.
+  elfcopy                 Test the **elfcopy** utility.
+  elfdump                 Test the **elfdump** utility.
+  libdwarf                Test the **libdwarf** library.
+  libelf                  Test the **libelf** library.
+  nm                      Test the **nm** utility.
   =================       ==========================================
 
 
@@ -128,7 +128,7 @@ Other significant changes include:
 * **ar**
 
   * A file descriptor exhaustion bug was fixed [ticket #388].
-  * Support for building with newer versions of ``libarchive``.
+  * Support for building with newer versions of **libarchive**.
   * Memory errors were corrected.
 
 * **brandelf**
@@ -142,7 +142,7 @@ Other significant changes include:
 
 * **elfdump**
 
-  * Compatibility with Solaris(TM) ``elfdump`` was improved.
+  * Compatibility with Solaris(TM) **elfdump** was improved.
   * Memory errors were corrected.
 
 * **libdwarf**
@@ -211,14 +211,14 @@ The test summary for this release is presented below:
 
  ========= ==========  ===============  ===============  ================  ===================
  **Suite** **Tests**   **DragonFly**    **FreeBSD**      **NetBSD**        **Ubuntu 10.04LTS**
-	   (32&64bit)  (i386)		(i386 & amd64)   (i386)            (i386 & x86_64)
+           (32&64bit)  (i386)           (i386 & amd64)   (i386)            (i386 & x86_64)
  ========= ==========  ===============  ===============  ================  ===================
- ar	   235 & 230   P:235            P:235 & P:230    P:235             P:235 & P:230
+ ar        235 & 230   P:235            P:235 & P:230    P:235             P:235 & P:230
  elfcopy   156         P:156            P:156            P:156             P:156
- elfdump   155         P:155            P:155            P:155		   P:155
- libdwarf  133         P:133            P:133            P:133		   P:133
- libelf    1024        P:1020, U:4      P:1020, U:4      P:1020, U:4	   P:1020, U:4
- nm        183         P:183            P:183            P:183		   P:183
+ elfdump   155         P:155            P:155            P:155             P:155
+ libdwarf  133         P:133            P:133            P:133             P:133
+ libelf    1024        P:1020, U:4      P:1020, U:4      P:1020, U:4       P:1020, U:4
+ nm        183         P:183            P:183            P:183             P:183
  ========= ==========  ===============  ===============  ================  ===================
 
 Key:
@@ -243,9 +243,6 @@ More Information
 ================
 
 The project's website is at http://elftoolchain.sourceforge.net/.
-
-The source code for this software and for its associated documentation
-is open-source under the BSD license.
 
 Developer Community
 -------------------
