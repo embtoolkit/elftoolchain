@@ -127,14 +127,14 @@ Other significant changes include:
 
 * **ar**
 
-  * A file descriptor exhaustion bug was fixed [ticket #388].
+  * A file descriptor exhaustion bug was fixed [`ticket #388`_].
   * Support for building with newer versions of **libarchive**.
   * Memory errors were corrected.
 
 * **brandelf**
 
   * The **brandelf** utility will try to preserve the layout of the
-    ELF object being updated [ticket #375].
+    ELF object being updated [`ticket #375`_].
 
 * **elfcopy/strip/mcs**
 
@@ -147,8 +147,8 @@ Other significant changes include:
 
 * **libdwarf**
 
-  * Partial support for DWARF4 has been added [ticket #394]
-  * An infinite loop bug was fixed [ticket #396].
+  * Partial support for DWARF4 has been added [`ticket #394`_]
+  * An infinite loop bug was fixed [`ticket #396`_].
   * Memory related errors were fixed.
 
 * **libelf**
@@ -272,6 +272,10 @@ This software is copyright its authors, and is distributed under the
 .. _OpenBSD: http://www.openbsd.org/
 .. _`Trac instance`: http://sourceforge.net/apps/trac/elftoolchain/report
 .. _Ubuntu:  http://www.ubuntu.com/
+.. _ticket #375: http://sourceforge.net/apps/trac/elftoolchain/ticket/375
+.. _ticket #388: http://sourceforge.net/apps/trac/elftoolchain/ticket/388
+.. _ticket #394: http://sourceforge.net/apps/trac/elftoolchain/ticket/394
+.. _ticket #396: http://sourceforge.net/apps/trac/elftoolchain/ticket/396
 
 .. Local Variables:
 .. mode: rst
